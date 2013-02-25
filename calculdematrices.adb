@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 -- NOM DU CSU (principal)           : calculdematrices.adb
 -- AUTEUR DU CSU                    : Pascal Pignard
--- VERSION DU CSU                   : 1.1a
--- DATE DE LA DERNIERE MISE A JOUR  : 17 février 2013
+-- VERSION DU CSU                   : 1.1b
+-- DATE DE LA DERNIERE MISE A JOUR  : 25 février 2013
 -- ROLE DU CSU                      : Opérations sur les matrices.
 --
 --
@@ -362,7 +362,7 @@ procedure CalculDeMatrices is
          return R : Matrice := Créé_Matrice (M.Lignes, M.Colonnes) do
             for I in 1 .. R.Lignes loop
                for J in 1 .. R.Colonnes loop
-                  Positionne (R, I, J, Lambda * Element (M, J, I));
+                  Positionne (R, I, J, Lambda * Element (M, I, J));
                end loop;
             end loop;
          end return;
