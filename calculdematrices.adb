@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 -- NOM DU CSU (principal)           : calculdematrices.adb
 -- AUTEUR DU CSU                    : Pascal Pignard
--- VERSION DU CSU                   : 1.0a
--- DATE DE LA DERNIERE MISE A JOUR  : 15 avril 2012
+-- VERSION DU CSU                   : 1.1a
+-- DATE DE LA DERNIERE MISE A JOUR  : 17 février 2013
 -- ROLE DU CSU                      : Opérations sur les matrices.
 --
 --
@@ -13,7 +13,7 @@
 --
 -- NOTES                            : Ada 2005, UTF8
 --
--- COPYRIGHT                        : (c) Pascal Pignard 1989-2012
+-- COPYRIGHT                        : (c) Pascal Pignard 1989-2013
 -- LICENCE                          : CeCILL V2 (http://www.cecill.info)
 -- CONTACT                          : http://blady.pagesperso-orange.fr
 -------------------------------------------------------------------------------
@@ -49,6 +49,7 @@ procedure CalculDeMatrices is
       function "-" (M : Matrice) return Matrice;
       function "-" (Gauche, Droite : Matrice) return Matrice;
       function "*" (Gauche, Droite : Matrice) return Matrice;
+      function "**" (M : Matrice; Exposant : Integer) return Matrice;
       function Déterminant (M : Matrice) return TElement;
       function Inverse (M : Matrice) return Matrice;
       function "*" (M : Matrice; Lambda : TElement) return Matrice;
@@ -217,6 +218,27 @@ procedure CalculDeMatrices is
             end loop;
          end return;
       end "*";
+
+      function "**" (M : Matrice; Exposant : Integer) return Matrice is
+         R : Matrice := M;
+      begin
+         if M.Lignes /= M.Colonnes then
+            raise Constraint_Error;
+         end if;
+         if Exposant = 0 then
+            return Identité (M.Lignes);
+         end if;
+         for I in 1 .. abs Exposant / 2 loop
+            R := R * R;
+         end loop;
+         if abs Exposant mod 2 /= 0 and abs Exposant > 1 then
+            R := R * M;
+         end if;
+         if Exposant < 0 then
+            R := Inverse (R);
+         end if;
+         return R;
+      end "**";
 
       function Déterminant (M : Matrice) return TElement is
          I, N    : Positive;
@@ -409,6 +431,11 @@ begin
    Put_Line (Déterminant (M)'Img);
    New_Line;
    Affiche (M * Inverse (M));
+   Affiche (M * M ** (-1));
+   Affiche (M * M);
+   Affiche (M ** 2);
+   Affiche (M * M * M);
+   Affiche (M ** 3);
    Put_Line (Trace (M)'Img);
    New_Line;
    Affiche (Transpose (M));
