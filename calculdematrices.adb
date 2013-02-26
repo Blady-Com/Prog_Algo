@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 -- NOM DU CSU (principal)           : calculdematrices.adb
 -- AUTEUR DU CSU                    : Pascal Pignard
--- VERSION DU CSU                   : 1.0a
--- DATE DE LA DERNIERE MISE A JOUR  : 15 avril 2012
+-- VERSION DU CSU                   : 2.0a
+-- DATE DE LA DERNIERE MISE A JOUR  : 9 décembre 2012
 -- ROLE DU CSU                      : Opérations sur les matrices.
 --
 --
@@ -11,7 +11,7 @@
 -- FONCTIONS LOCALES DU CSU         :
 --
 --
--- NOTES                            : Ada 2005, UTF8
+-- NOTES                            : Ada 2012, UTF8
 --
 -- COPYRIGHT                        : (c) Pascal Pignard 1989-2012
 -- LICENCE                          : CeCILL V2 (http://www.cecill.info)
@@ -32,25 +32,48 @@ procedure CalculDeMatrices is
       function Créé_Matrice
         (Lignes, Colonnes : Positive;
          Valeur           : TElement := 0.0)
-         return             Matrice;
-      function Créé_Matrice (T : Tableau) return Matrice;
+         return             Matrice
+      with Post => (nb_lignes(Créé_Matrice'Result)=lignes)
+        and (nb_colonnes(Créé_Matrice'Result)=colonnes)
+        and (for all I in 1..lignes =>
+               (for all J in 1..colonnes =>
+                element(Créé_Matrice'Result,I,J)=Valeur));
+      function Créé_Matrice (T : Tableau) return Matrice
+      with Post => (nb_lignes(Créé_Matrice'Result) = T'Length(1))
+        and (nb_colonnes(Créé_Matrice'Result) = T'Length(2));
       function Nb_Lignes (M : Matrice) return Natural;
       function Nb_Colonnes (M : Matrice) return Natural;
-      function Element (M : Matrice; Ligne, Colonne : Positive) return TElement;
-      procedure Positionne
-        (M              : in out Matrice;
-         Ligne, Colonne : Positive;
-         Element        : TElement);
-      function Trace (M : Matrice) return TElement;
+      function Element (M : Matrice; Ligne, Colonne : Positive) return TElement
+      with Pre => Ligne<=nb_lignes(m) and colonne<=nb_colonnes(m);
+      procedure Positionne (M : in out Matrice; Ligne, Colonne : Positive; Element : TElement)
+      with Pre => Ligne<=nb_lignes(m) and colonne<=nb_colonnes(m),
+      Post => matrices.element(m,ligne,colonne)=element;
+      function Trace (M : Matrice) return TElement
+      with pre => nb_lignes(m) = nb_colonnes(m);
       function Transpose (M : Matrice) return Matrice;
-      function Identité (Taille : Positive) return Matrice;
-      function Aléatoire (Lignes, Colonnes : Positive) return Matrice;
-      function "+" (Gauche, Droite : Matrice) return Matrice;
+      function Identité (Taille : Positive) return Matrice
+      with post=>(nb_lignes(Identité'Result)=Taille)
+        and (nb_colonnes(Identité'Result)=Taille)
+        and (for all I in 1.. Taille =>
+               (for all J in 1..Taille => (if I = J then
+                                           element(Identité'Result,I,J)=1.0 else
+                                           element(Identité'Result,I,J)=0.0)));
+      function Aléatoire (Lignes, Colonnes : Positive) return Matrice
+      with Post => (nb_lignes(Aléatoire'Result)=lignes)
+        and (nb_colonnes(Aléatoire'Result)=colonnes);
+      function "+" (Gauche, Droite : Matrice) return Matrice
+      with pre=>nb_lignes(Gauche) = nb_lignes(Droite)
+        and nb_colonnes(Gauche) = nb_colonnes(Droite);
       function "-" (M : Matrice) return Matrice;
-      function "-" (Gauche, Droite : Matrice) return Matrice;
-      function "*" (Gauche, Droite : Matrice) return Matrice;
-      function Déterminant (M : Matrice) return TElement;
-      function Inverse (M : Matrice) return Matrice;
+      function "-" (Gauche, Droite : Matrice) return Matrice
+      with pre=>nb_lignes(Gauche) = nb_lignes(Droite)
+        and nb_colonnes(Gauche) = nb_colonnes(Droite);
+      function "*" (Gauche, Droite : Matrice) return Matrice
+      with pre=>nb_colonnes(Gauche) = nb_lignes (Droite);
+      function Déterminant (M : Matrice) return TElement
+      with pre=>nb_lignes(m) = nb_colonnes(m);
+      function Inverse (M : Matrice) return Matrice
+      with pre=>nb_lignes(m) = nb_colonnes(m);
       function "*" (M : Matrice; Lambda : TElement) return Matrice;
       function "*" (Lambda : TElement; M : Matrice) return Matrice;
       procedure Affiche (M : Matrice);
@@ -68,6 +91,10 @@ procedure CalculDeMatrices is
       function "&" (Left : Matrice; Right : TElement) return Matrice;
       function "&" (Left : TElement; Right : Matrice) return Matrice;
       function "&" (Left, Right : TElement) return Matrice;
+      function Copy
+        (Source   : Matrice;
+         Capacity : Ada.Containers.Count_Type := 0)
+         return     Matrice;
    end Matrices;
 
    package body Matrices is
@@ -78,19 +105,18 @@ procedure CalculDeMatrices is
          return             Matrice
       is
       begin
-         return (IntMatrices.To_Vector
-                    (Valeur,
-                     Ada.Containers.Count_Type (Lignes * Colonnes)) with Lignes, Colonnes);
+         return (IntMatrices.To_Vector (Valeur, Ada.Containers.Count_Type (Lignes * Colonnes))
+                 with Lignes, Colonnes);
       end Créé_Matrice;
 
       function Créé_Matrice (T : Tableau) return Matrice is
       begin
          return M : Matrice :=
-              (IntMatrices.To_Vector
-                  (Ada.Containers.Count_Type ((T'Last (1) + 1 - T'First (1)) *
-                                              (T'Last (2) + 1 - T'First (2)))) with
-               T'Last (1) + 1 - T'First (1),
-               T'Last (2) + 1 - T'First (2)) do
+           (IntMatrices.To_Vector
+              (Ada.Containers.Count_Type ((T'Last (1) + 1 - T'First (1)) *
+               (T'Last (2) + 1 - T'First (2)))) with
+              T'Last (1) + 1 - T'First (1),
+            T'Last (2) + 1 - T'First (2)) do
             for I in T'Range (1) loop
                for J in T'Range (2) loop
                   Positionne (M, I + 1 - T'First (1), J + 1 - T'First (2), T (I, J));
@@ -111,29 +137,16 @@ procedure CalculDeMatrices is
 
       function Element (M : Matrice; Ligne, Colonne : Positive) return TElement is
       begin
-         if Ligne > M.Lignes or Colonne > M.Colonnes then
-            raise Constraint_Error;
-         end if;
          return Element (M, (Ligne - 1) * M.Colonnes + Colonne);
       end Element;
 
-      procedure Positionne
-        (M              : in out Matrice;
-         Ligne, Colonne : Positive;
-         Element        : TElement)
-      is
+      procedure Positionne (M : in out Matrice; Ligne, Colonne : Positive; Element : TElement) is
       begin
-         if Ligne > M.Lignes or Colonne > M.Colonnes then
-            raise Constraint_Error;
-         end if;
          Replace_Element (M, (Ligne - 1) * M.Colonnes + Colonne, Element);
       end Positionne;
 
       function Trace (M : Matrice) return TElement is
       begin
-         if M.Lignes /= M.Colonnes then
-            raise Constraint_Error;
-         end if;
          return R : TElement := 0.0 do
             for I in 1 .. M.Lignes loop
                R := R + Element (M, I, I);
@@ -175,9 +188,6 @@ procedure CalculDeMatrices is
 
       function "+" (Gauche, Droite : Matrice) return Matrice is
       begin
-         if Gauche.Lignes /= Droite.Lignes or Gauche.Colonnes /= Droite.Colonnes then
-            raise Constraint_Error;
-         end if;
          return R : Matrice := Créé_Matrice (Gauche.Lignes, Gauche.Colonnes) do
             for I in 1 .. R.Lignes loop
                for J in 1 .. R.Colonnes loop
@@ -199,10 +209,7 @@ procedure CalculDeMatrices is
 
       function "*" (Gauche, Droite : Matrice) return Matrice is
       begin
-         if Gauche.Lignes /= Droite.Colonnes then
-            raise Constraint_Error;
-         end if;
-         return R : Matrice := Créé_Matrice (Gauche.Lignes, Droite.Colonnes) do
+        return R : Matrice := Créé_Matrice (Gauche.Lignes, Droite.Colonnes) do
             for I in 1 .. R.Lignes loop
                for J in 1 .. R.Colonnes loop
                   declare
@@ -223,9 +230,6 @@ procedure CalculDeMatrices is
          LDet, D : TElement;
          LM      : Matrice := M;
       begin
-         if M.Lignes /= M.Colonnes then
-            raise Constraint_Error;
-         end if;
          N    := LM.Lignes;
          LDet := 1.0;
          for K in 1 .. N - 1 loop
@@ -259,9 +263,6 @@ procedure CalculDeMatrices is
          El, Ec        : array (1 .. M.Lignes) of Positive;
          M2            : Matrice := M;
       begin
-         if M.Lignes /= M.Colonnes then
-            raise Constraint_Error;
-         end if;
          N := M2.Lignes;
          for Lc in 1 .. N loop
             Max := 0.0;
@@ -300,7 +301,7 @@ procedure CalculDeMatrices is
                            I,
                            J,
                            Element (M2, I, J) -
-                           Element (M2, I, Lc) * Element (M2, Lc, J) / Pivot);
+                             Element (M2, I, Lc) * Element (M2, Lc, J) / Pivot);
                      end if;
                   end loop;
                end if;
@@ -340,7 +341,7 @@ procedure CalculDeMatrices is
          return R : Matrice := Créé_Matrice (M.Lignes, M.Colonnes) do
             for I in 1 .. R.Lignes loop
                for J in 1 .. R.Colonnes loop
-                  Positionne (R, I, J, Lambda * Element (M, J, I));
+                  Positionne (R, I, J, Lambda * Element (M, I, J));
                end loop;
             end loop;
          end return;
@@ -378,7 +379,8 @@ procedure CalculDeMatrices is
 
       function "&" (Left, Right : Matrice) return Matrice is
       begin
-         return (IntMatrices."&" (IntMatrices.Vector (Left), IntMatrices.Vector (Right)) with 0, 0);
+         return (IntMatrices."&" (IntMatrices.Vector (Left), IntMatrices.Vector (Right))
+                 with 0, 0);
       end "&";
 
       function "&" (Left : Matrice; Right : TElement) return Matrice is
@@ -396,29 +398,37 @@ procedure CalculDeMatrices is
          return (IntMatrices."&" (Left, Right) with 0, 0);
       end "&";
 
+      function Copy
+        (Source   : Matrice;
+         Capacity : Ada.Containers.Count_Type := 0)
+         return     Matrice
+      is
+      begin
+         return (IntMatrices.Copy (IntMatrices.Vector (Source), Capacity) with 0, 0);
+      end Copy;
    end Matrices;
 
-   package MatricesRéelles is new Matrices (Float);
-   use MatricesRéelles;
+   package MatricesReelles is new Matrices (Float);
+   use MatricesReelles;
    M  : Matrice          := Créé_Matrice (((1.0, 2.0), (3.0, 4.0)));
-   M2 : constant Matrice := Créé_Matrice (4, 4);
+   M2 : Matrice          := Créé_Matrice (6, 3, 2.0);
+   A  : constant Matrice := Aléatoire (2, 2);
 begin
    Affiche (Identité (3) * 2.5 + Identité (3));
-   Affiche (2.0 * Identité (3) + Aléatoire (3, 3));
-   Affiche (M);
+   Affiche (2.0 * Identité (3) - Aléatoire (3, 3));
+   Affiche (-M);
    Put_Line (Déterminant (M)'Img);
    New_Line;
    Affiche (M * Inverse (M));
    Put_Line (Trace (M)'Img);
+   Put_Line (Trace (A * M * Inverse (A))'Img);
    New_Line;
    Affiche (Transpose (M));
    M :=
      Créé_Matrice (((1 => 1.0), (1 => 2.0), (1 => 3.0))) *
-     Créé_Matrice ((1 => (1.0, 2.0, 3.0))) +
+     (4.0 * Créé_Matrice ((1 => (1.0, 2.0, 3.0)))) +
      Créé_Matrice (3, 3, 10.0);
    Affiche (M);
-   Put_Line (Element (M, 2, 3)'Img);
-   New_Line;
-   M := M2 + Identité (4);
-   Affiche (M);
+   Positionne (M2, Nb_Lignes (M2), Nb_Colonnes (M2), 5.5);
+   Put_Line (Element (M2, 6, 3)'Img);
 end CalculDeMatrices;

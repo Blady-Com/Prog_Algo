@@ -8,7 +8,7 @@ project Math is
    end Builder;
 
    package Compiler is
-      for Default_Switches ("ada") use ("-gnatwa", "-g", "-gnato", "-fstack-check", "-gnatE", "-gnatf", "-gnatW8", "-gnata", "-gnat05");
+      for Default_Switches ("ada") use ("-gnatwa", "-g", "-gnato", "-fstack-check", "-gnatE", "-gnatf", "-gnatW8", "-gnata", "-gnat12");
    end Compiler;
 
    package Binder is

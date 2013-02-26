@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 -- NOM DU CSU (principal)           : calculdelistes.adb
 -- AUTEUR DU CSU                    : Pascal Pignard
--- VERSION DU CSU                   : 1.0a
--- DATE DE LA DERNIERE MISE A JOUR  : 17 mai 2012
+-- VERSION DU CSU                   : 2.0a
+-- DATE DE LA DERNIERE MISE A JOUR  : 9 décembre 2012
 -- ROLE DU CSU                      : Opérations sur les listes.
 --
 --
@@ -11,7 +11,7 @@
 -- FONCTIONS LOCALES DU CSU         :
 --
 --
--- NOTES                            : Ada 2005, UTF8
+-- NOTES                            : Ada 2012, UTF8
 --
 -- COPYRIGHT                        : (c) Pascal Pignard 2012
 -- LICENCE                          : CeCILL V2 (http://www.cecill.info)
@@ -25,24 +25,32 @@ procedure CalculDeListes is
    generic
       type TElement is private;
    package Listes is
-      type Liste is tagged private;
+      type Liste (<>) is tagged private;
       Liste_Vide : constant Liste;
       type Tableau is array (Positive range <>) of TElement;
-      function Créé_Liste (T : Tableau) return Liste;
-      function "&" (Gauche, Droite : Liste) return Liste;
-      function "&" (Gauche : Liste; Droite : TElement) return Liste;
-      function "&" (Gauche : TElement; Droite : Liste) return Liste;
+      function Créé_Liste (T : Tableau) return Liste
+      with post=> Longueur(Créé_Liste'Result) = T'Length;
+      function "&" (Gauche, Droite : Liste) return Liste
+      with post=> Longueur("&"'Result) = Longueur(Gauche) + Longueur(Droite);
+      function "&" (Gauche : Liste; Droite : TElement) return Liste
+      with post=> Longueur("&"'Result) = Longueur(Gauche) + 1;
+      function "&" (Gauche : TElement; Droite : Liste) return Liste
+      with post=> Longueur("&"'Result) = Longueur(Droite) + 1;
       function Est_Vide (L : Liste) return Boolean;
       function Longueur (L : Liste) return Natural;
-      function Tête (L : Liste) return TElement;
-      function Queue (L : Liste) return TElement;
-      function Position (L : Liste; P : Positive) return TElement;
+      function Tête (L : Liste) return TElement
+      with pre=> not Est_Vide(L);
+      function Queue (L : Liste) return TElement
+      with pre=> not Est_Vide(L);
+      function Position (L : Liste; P : Positive) return TElement
+      with pre=> Longueur(L)>=P;
       function Renverse (L : Liste) return Liste;
       function Applique
         (L    : Liste;
-         F    : access function (E : TElement) return TElement)
+         F    : not null access function (E : TElement) return TElement)
          return Liste;
-      procedure Scinde (L : Liste; Tête : out TElement; Reste : out Liste);
+      procedure Scinde (L : Liste; Tête : out TElement; Reste : out Liste)
+      with pre=> not Est_Vide(L);
    private
       package IntListes is new Ada.Containers.Doubly_Linked_Lists (TElement);
       type Liste is new IntListes.List with null record;
@@ -53,7 +61,7 @@ procedure CalculDeListes is
 
       function Créé_Liste (T : Tableau) return Liste is
       begin
-         return L : Liste do
+         return L : Liste := Liste_Vide do
             for Index in T'Range loop
                Append (L, T (Index));
             end loop;
@@ -115,13 +123,13 @@ procedure CalculDeListes is
 
       function Applique
         (L    : Liste;
-         F    : access function (E : TElement) return TElement)
+         F    : not null access function (E : TElement) return TElement)
          return Liste
       is
          Curseur : IntListes.Cursor := First (L);
          use type IntListes.Cursor;
       begin
-         return RL : Liste do
+         return RL : Liste := Liste_Vide do
             while Curseur /= IntListes.No_Element loop
                Append (RL, F (IntListes.Element (Curseur)));
                IntListes.Next (Curseur);
@@ -135,6 +143,7 @@ procedure CalculDeListes is
       begin
          if Curseur /= IntListes.No_Element then
             Tête  := IntListes.Element (Curseur);
+            Reste := Liste_Vide;
             IntListes.Next (Curseur);
             while Curseur /= IntListes.No_Element loop
                Append (Reste, IntListes.Element (Curseur));
@@ -152,7 +161,7 @@ procedure CalculDeListes is
 
    function Mini (L : Liste) return Float is
       M, A : Float;
-      LP   : Liste;
+      LP   : Liste := Liste_Vide;
    begin
       if L.Longueur = 1 then
          return L.Tête;
@@ -179,5 +188,6 @@ begin
          (Applique
              (5.0 & Créé_Liste ((2.0, 4.0, 3.3)) & Créé_Liste ((1 => 8.2)),
               Fois_2'Access),
-          5));
+         5));
+   Put (Queue (3.4 & Liste_Vide));
 end CalculDeListes;
