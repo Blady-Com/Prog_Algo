@@ -1,8 +1,8 @@
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- NOM DU CSU (principal)           : calculdematrices.adb
 -- AUTEUR DU CSU                    : Pascal Pignard
--- VERSION DU CSU                   : 1.1b
--- DATE DE LA DERNIERE MISE A JOUR  : 25 février 2013
+-- VERSION DU CSU                   : 1.1c
+-- DATE DE LA DERNIERE MISE A JOUR  : 25 avril 2013
 -- ROLE DU CSU                      : Opérations sur les matrices.
 --
 --
@@ -16,7 +16,7 @@
 -- COPYRIGHT                        : (c) Pascal Pignard 1989-2013
 -- LICENCE                          : CeCILL V2 (http://www.cecill.info)
 -- CONTACT                          : http://blady.pagesperso-orange.fr
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 with Ada.Text_IO;               use Ada.Text_IO;
 with Ada.Numerics.Float_Random;
@@ -37,10 +37,7 @@ procedure CalculDeMatrices is
       function Nb_Lignes (M : Matrice) return Natural;
       function Nb_Colonnes (M : Matrice) return Natural;
       function Element (M : Matrice; Ligne, Colonne : Positive) return TElement;
-      procedure Positionne
-        (M              : in out Matrice;
-         Ligne, Colonne : Positive;
-         Element        : TElement);
+      procedure Positionne (M : in out Matrice; Ligne, Colonne : Positive; Element : TElement);
       function Trace (M : Matrice) return TElement;
       function Transpose (M : Matrice) return Matrice;
       function Identité (Taille : Positive) return Matrice;
@@ -79,9 +76,8 @@ procedure CalculDeMatrices is
          return             Matrice
       is
       begin
-         return (IntMatrices.To_Vector
-                    (Valeur,
-                     Ada.Containers.Count_Type (Lignes * Colonnes)) with Lignes, Colonnes);
+         return (IntMatrices.To_Vector (Valeur, Ada.Containers.Count_Type (Lignes * Colonnes))
+         with Lignes, Colonnes);
       end Créé_Matrice;
 
       function Créé_Matrice (T : Tableau) return Matrice is
@@ -118,11 +114,7 @@ procedure CalculDeMatrices is
          return Element (M, (Ligne - 1) * M.Colonnes + Colonne);
       end Element;
 
-      procedure Positionne
-        (M              : in out Matrice;
-         Ligne, Colonne : Positive;
-         Element        : TElement)
-      is
+      procedure Positionne (M : in out Matrice; Ligne, Colonne : Positive; Element : TElement) is
       begin
          if Ligne > M.Lignes or Colonne > M.Colonnes then
             raise Constraint_Error;
@@ -200,7 +192,7 @@ procedure CalculDeMatrices is
 
       function "*" (Gauche, Droite : Matrice) return Matrice is
       begin
-         if Gauche.Lignes /= Droite.Colonnes then
+         if Gauche.Colonnes /= Droite.Lignes then
             raise Constraint_Error;
          end if;
          return R : Matrice := Créé_Matrice (Gauche.Lignes, Droite.Colonnes) do
@@ -220,22 +212,22 @@ procedure CalculDeMatrices is
       end "*";
 
       function "**" (M : Matrice; Exposant : Integer) return Matrice is
-         R : Matrice := M;
+         R : Matrice := Identité (M.Lignes);
+         S : Matrice := M;
+         N : Natural := abs Exposant;
       begin
          if M.Lignes /= M.Colonnes then
             raise Constraint_Error;
          end if;
-         if Exposant = 0 then
-            return Identité (M.Lignes);
-         end if;
-         for I in 1 .. abs Exposant / 2 loop
-            R := R * R;
+         while N /= 0 loop
+            if N mod 2 = 1 then
+               R := R * S;
+            end if;
+            N := N / 2;
+            S := S * S;
          end loop;
-         if abs Exposant mod 2 /= 0 and abs Exposant > 1 then
-            R := R * M;
-         end if;
          if Exposant < 0 then
-            R := Inverse (R);
+            return Inverse (R);
          end if;
          return R;
       end "**";
@@ -422,8 +414,9 @@ procedure CalculDeMatrices is
 
    package MatricesRéelles is new Matrices (Float);
    use MatricesRéelles;
-   M  : Matrice          := Créé_Matrice (((1.0, 2.0), (3.0, 4.0)));
-   M2 : constant Matrice := Créé_Matrice (4, 4);
+   V0 : constant Matrice := Créé_Matrice (4, 1, 1.0 / 4.0);
+   M  : Matrice          := Créé_Matrice (((1.0, 2.0), (3.0, 1.0 / 4.0)));
+   M2 : Matrice          := Créé_Matrice (4, 4, 2.0);
 begin
    Affiche (Identité (3) * 2.5 + Identité (3));
    Affiche (2.0 * Identité (3) + Aléatoire (3, 3));
@@ -432,10 +425,10 @@ begin
    New_Line;
    Affiche (M * Inverse (M));
    Affiche (M * M ** (-1));
-   Affiche (M * M);
-   Affiche (M ** 2);
-   Affiche (M * M * M);
-   Affiche (M ** 3);
+   Affiche (M * M * M * M * M * M * M);
+   Affiche (M ** 7);
+   Affiche (Inverse (M * M * M * M * M * M * M));
+   Affiche (M ** (-7));
    Put_Line (Trace (M)'Img);
    New_Line;
    Affiche (Transpose (M));
@@ -446,6 +439,6 @@ begin
    Affiche (M);
    Put_Line (Element (M, 2, 3)'Img);
    New_Line;
-   M := M2 + Identité (4);
-   Affiche (M);
+   M2 := M2 + Identité (4);
+   Affiche (M2 * V0);
 end CalculDeMatrices;
