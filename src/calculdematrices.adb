@@ -18,7 +18,7 @@
 -- CONTACT                          : http://blady.pagesperso-orange.fr
 --------------------------------------------------------------------------------
 
-with Ada.Text_IO;               use Ada.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Numerics.Float_Random;
 with Ada.Containers.Vectors;
 
@@ -27,12 +27,9 @@ procedure CalculDeMatrices is
    generic
       type TElement is digits <>;
    package Matrices is
-      type Matrice (<>) is tagged private;
+      type Matrice (<>) is private;
       type Tableau is array (Positive range <>, Positive range <>) of TElement;
-      function Créé_Matrice
-        (Lignes, Colonnes : Positive;
-         Valeur           : TElement := 0.0)
-         return             Matrice;
+      function Créé_Matrice (Lignes, Colonnes : Positive; Valeur : TElement := 0.0) return Matrice;
       function Créé_Matrice (T : Tableau) return Matrice;
       function Nb_Lignes (M : Matrice) return Natural;
       function Nb_Colonnes (M : Matrice) return Natural;
@@ -58,36 +55,30 @@ procedure CalculDeMatrices is
          Lignes, Colonnes : Natural;
       end record;
       function To_Vector (Length : Ada.Containers.Count_Type) return Matrice;
-      function To_Vector
-        (New_Item : TElement;
-         Length   : Ada.Containers.Count_Type)
-         return     Matrice;
+      function To_Vector (New_Item : TElement; Length : Ada.Containers.Count_Type) return Matrice;
       function "&" (Left, Right : Matrice) return Matrice;
       function "&" (Left : Matrice; Right : TElement) return Matrice;
       function "&" (Left : TElement; Right : Matrice) return Matrice;
       function "&" (Left, Right : TElement) return Matrice;
+      function Copy (Source : Matrice; Capacity : Ada.Containers.Count_Type := 0) return Matrice;
    end Matrices;
 
    package body Matrices is
 
-      function Créé_Matrice
-        (Lignes, Colonnes : Positive;
-         Valeur           : TElement := 0.0)
-         return             Matrice
-      is
+      function Créé_Matrice (Lignes, Colonnes : Positive; Valeur : TElement := 0.0) return Matrice is
       begin
-         return (IntMatrices.To_Vector (Valeur, Ada.Containers.Count_Type (Lignes * Colonnes))
-         with Lignes, Colonnes);
+         return (IntMatrices.To_Vector (Valeur, Ada.Containers.Count_Type (Lignes * Colonnes)) with Lignes, Colonnes);
       end Créé_Matrice;
 
       function Créé_Matrice (T : Tableau) return Matrice is
       begin
-         return M : Matrice :=
-              (IntMatrices.To_Vector
-                  (Ada.Containers.Count_Type ((T'Last (1) + 1 - T'First (1)) *
-                                              (T'Last (2) + 1 - T'First (2)))) with
-               T'Last (1) + 1 - T'First (1),
-               T'Last (2) + 1 - T'First (2)) do
+         return
+           M : Matrice :=
+             (IntMatrices.To_Vector
+                (Ada.Containers.Count_Type ((T'Last (1) + 1 - T'First (1)) * (T'Last (2) + 1 - T'First (2)))) with
+              T'Last (1) + 1 - T'First (1),
+              T'Last (2) + 1 - T'First (2))
+         do
             for I in T'Range (1) loop
                for J in T'Range (2) loop
                   Positionne (M, I + 1 - T'First (1), J + 1 - T'First (2), T (I, J));
@@ -309,12 +300,7 @@ procedure CalculDeMatrices is
                if I /= Lc then
                   for J in 1 .. N loop
                      if J /= Lc then
-                        Positionne
-                          (M2,
-                           I,
-                           J,
-                           Element (M2, I, J) -
-                           Element (M2, I, Lc) * Element (M2, Lc, J) / Pivot);
+                        Positionne (M2, I, J, Element (M2, I, J) - Element (M2, I, Lc) * Element (M2, Lc, J) / Pivot);
                      end if;
                   end loop;
                end if;
@@ -381,11 +367,7 @@ procedure CalculDeMatrices is
          return (IntMatrices.To_Vector (Length) with 0, 0);
       end To_Vector;
 
-      function To_Vector
-        (New_Item : TElement;
-         Length   : Ada.Containers.Count_Type)
-         return     Matrice
-      is
+      function To_Vector (New_Item : TElement; Length : Ada.Containers.Count_Type) return Matrice is
       begin
          return (IntMatrices.To_Vector (New_Item, Length) with 0, 0);
       end To_Vector;
@@ -410,6 +392,10 @@ procedure CalculDeMatrices is
          return (IntMatrices."&" (Left, Right) with 0, 0);
       end "&";
 
+      function Copy (Source : Matrice; Capacity : Ada.Containers.Count_Type := 0) return Matrice is
+      begin
+         return (IntMatrices.Copy (IntMatrices.Vector (Source), Capacity) with 0, 0);
+      end Copy;
    end Matrices;
 
    package MatricesRéelles is new Matrices (Float);
@@ -424,17 +410,16 @@ begin
    Put_Line (Déterminant (M)'Img);
    New_Line;
    Affiche (M * Inverse (M));
-   Affiche (M * M ** (-1));
+   Affiche (M * M**(-1));
    Affiche (M * M * M * M * M * M * M);
-   Affiche (M ** 7);
+   Affiche (M**7);
    Affiche (Inverse (M * M * M * M * M * M * M));
-   Affiche (M ** (-7));
+   Affiche (M**(-7));
    Put_Line (Trace (M)'Img);
    New_Line;
    Affiche (Transpose (M));
    M :=
-     Créé_Matrice (((1 => 1.0), (1 => 2.0), (1 => 3.0))) *
-     Créé_Matrice ((1 => (1.0, 2.0, 3.0))) +
+     Créé_Matrice (((1 => 1.0), (1 => 2.0), (1 => 3.0))) * Créé_Matrice ((1 => (1.0, 2.0, 3.0))) +
      Créé_Matrice (3, 3, 10.0);
    Affiche (M);
    Put_Line (Element (M, 2, 3)'Img);

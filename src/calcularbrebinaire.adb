@@ -110,8 +110,7 @@ procedure CalculArbreBinaire is
             end if;
          end AjouteDans;
       begin
-         NoeudNouveau :=
-           new TNoeud'(Gauche => null, Droit => null, Clef => Clef, Element => Element);
+         NoeudNouveau := new TNoeud'(Gauche => null, Droit => null, Clef => Clef, Element => Element);
          if A /= null then
             AjouteDans (A);
          else
@@ -492,11 +491,8 @@ begin
    Put_Line ("Élement maximum :" & TElement'Image (MonArbre.Maximum (A1)));
    MonArbre.Retire (A1, Format (201), Element);
    Put_Line ("Élement retiré 201 :" & TElement'Image (Element));
-   Put_Line
-     ("Élement prédécesseur de 201 :" &
-      TElement'Image (MonArbre.Prédécesseur (A1, Format (201))));
-   Put_Line
-     ("Élement successeur de 201 :" & TElement'Image (MonArbre.Successeur (A1, Format (201))));
+   Put_Line ("Élement prédécesseur de 201 :" & TElement'Image (MonArbre.Prédécesseur (A1, Format (201))));
+   Put_Line ("Élement successeur de 201 :" & TElement'Image (MonArbre.Successeur (A1, Format (201))));
 
    Put_Line ("Est équilibré :" & Boolean'Image (MonArbre.Est_Equilibré (A1)));
    Put_Line ("Appel à 'Balance'.");
@@ -516,11 +512,8 @@ begin
    Put_Line ("Élement maximum :" & TElement'Image (MonArbre.Maximum (A1)));
    MonArbre.Retire (A1, Format (204), Element);
    Put_Line ("Élement retiré 204 :" & TElement'Image (Element));
-   Put_Line
-     ("Élement prédécesseur de 201 :" &
-      TElement'Image (MonArbre.Prédécesseur (A1, Format (201))));
-   Put_Line
-     ("Élement successeur de 201 :" & TElement'Image (MonArbre.Successeur (A1, Format (201))));
+   Put_Line ("Élement prédécesseur de 201 :" & TElement'Image (MonArbre.Prédécesseur (A1, Format (201))));
+   Put_Line ("Élement successeur de 201 :" & TElement'Image (MonArbre.Successeur (A1, Format (201))));
 
    MonArbre.Vide (A1);
    Put_Line ("Arbre vidé.");
@@ -529,8 +522,7 @@ begin
    for Ind in Tab'Range loop
       MonArbre.Ajoute (A2, Format (Tab (Ind)), Tab (Ind));
    end loop;
-   Put_Line
-     ("Nombre d'arbres équivalents :" & Natural'Image (MonArbre.Nb_Arbres_Equivalents (A2)));
+   Put_Line ("Nombre d'arbres équivalents :" & Natural'Image (MonArbre.Nb_Arbres_Equivalents (A2)));
    MonArbre.Affiche (A2);
    Put_Line ("Appel à 'Balance'.");
    MonArbre.Balance (A2);

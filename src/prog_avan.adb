@@ -277,7 +277,7 @@ procedure prog_avan is
       ExisteFils  : not null access function (I : Natural; P : TP) return Boolean;
       ExisteFrere : not null access function (I : Natural; P : TP) return Boolean)
    is
-      P : TP (1 .. N);
+      P : TP (1 .. N)          := (others => 0);
       I : Natural range 0 .. N := 0;
 
    begin
@@ -311,7 +311,7 @@ procedure prog_avan is
       ExisteFils  : not null access function (I : Natural; P : TP) return Boolean;
       ExisteFrere : not null access function (I : Natural; P : TP) return Boolean)
    is
-      P         : TP (1 .. N);
+      P         : TP (1 .. N)          := (others => 0);
       I         : Natural range 0 .. N := 0;
       Term, Acc : Boolean;
 
@@ -353,7 +353,7 @@ procedure prog_avan is
       ExisteFils  : not null access function (I : Natural; P : TP) return Boolean;
       ExisteFrere : not null access function (I : Natural; P : TP) return Boolean)
    is
-      P         : TP (1 .. N);
+      P         : TP (1 .. N)          := (others => 0);
       V         : array (Natural range 0 .. N) of Integer;
       I         : Natural range 0 .. N := 0;
       C         : Natural              := 0;
@@ -370,7 +370,7 @@ procedure prog_avan is
                V (I - 1) := Positive'Max (V (I), V (I - 1));
             else
                -- non terminal en préordre
-               V (I) := Positive'Last * (-1) ** I;
+               V (I) := Positive'Last * (-1)**I;
                I     := I + 1;
                P (I) := DefiniFils (I, P);
             end if;
@@ -411,7 +411,7 @@ procedure prog_avan is
       ExisteFils  : not null access function (I : Natural; P : TP) return Boolean;
       ExisteFrere : not null access function (I : Natural; P : TP) return Boolean)
    is
-      P         : TP (1 .. N);
+      P         : TP (1 .. N)          := (others => 0);
       V         : array (Natural range 0 .. N) of Integer;
       I         : Natural range 0 .. N := 0;
       C         : Natural              := 0;
@@ -434,7 +434,7 @@ procedure prog_avan is
                end if;
             else
                -- non terminal en préordre
-               V (I) := Positive'Last * (-1) ** I;
+               V (I) := Positive'Last * (-1)**I;
                I     := I + 1;
                P (I) := DefiniFils (I, P);
             end if;
@@ -483,6 +483,7 @@ procedure prog_avan is
       pragma Assert (K <= Max, "Number K too big!");
 
       function DefiniFils (I : Natural; P : TP) return Positive is
+         pragma Unreferenced (I, P);
       begin
          return 1;
       end DefiniFils;
@@ -491,6 +492,7 @@ procedure prog_avan is
          return P (I) + 1;
       end DefiniFrere;
       function ExisteFils (I : Natural; P : TP) return Boolean is
+         pragma Unreferenced (P);
       begin
          return I < N;
       end ExisteFils;
@@ -500,19 +502,8 @@ procedure prog_avan is
       end ExisteFrere;
 
    begin
-      Put_Line
-        (Positive'Image (K ** N) &
-         " n-uplets de" &
-         N'Img &
-         " éléments de valeur de 1 à" &
-         K'Img &
-         " :");
-      ParcoursArbre
-        (N,
-         DefiniFils'Access,
-         DefiniFrere'Access,
-         ExisteFils'Access,
-         ExisteFrere'Access);
+      Put_Line (Positive'Image (K**N) & " n-uplets de" & N'Img & " éléments de valeur de 1 à" & K'Img & " :");
+      ParcoursArbre (N, DefiniFils'Access, DefiniFrere'Access, ExisteFils'Access, ExisteFrere'Access);
    end N_Uplets;
 
    procedure Permutations (N : Positive) is
@@ -532,6 +523,7 @@ procedure prog_avan is
          return Acc;
       end Accepte;
       function DefiniFils (I : Natural; P : TP) return Natural is
+         pragma Unreferenced (I, P);
       begin
          return 1;
       end DefiniFils;
@@ -540,6 +532,7 @@ procedure prog_avan is
          return P (I) + 1;
       end DefiniFrere;
       function ExisteFils (I : Natural; P : TP) return Boolean is
+         pragma Unreferenced (P);
       begin
          return I < N;
       end ExisteFils;
@@ -568,7 +561,7 @@ procedure prog_avan is
       procedure EnContact (Origine : Index; Avec : TP) is
       begin
          for I in Avec'Range loop
-            A (Origine, Avec (I))  := True;
+            A (Origine, Avec (I)) := True;
          end loop;
       end EnContact;
       function Accepte (I : Natural; P : TP) return Boolean is
@@ -585,6 +578,7 @@ procedure prog_avan is
          return Acc;
       end Accepte;
       function DefiniFils (I : Natural; P : TP) return Natural is
+         pragma Unreferenced (I, P);
       begin
          return 1;
       end DefiniFils;
@@ -593,6 +587,7 @@ procedure prog_avan is
          return P (I) + 1;
       end DefiniFrere;
       function ExisteFils (I : Natural; P : TP) return Boolean is
+         pragma Unreferenced (P);
       begin
          return I < NombreRégions;
       end ExisteFils;
@@ -658,7 +653,7 @@ procedure prog_avan is
       Max : constant := 10;
       pragma Assert (N <= Max, "Number N too big!");
       pragma Assert (K <= Max, "Number K too big!");
-      Q : constant TP := NombresPremiers (10 ** N);
+      Q : constant TP := NombresPremiers (10**N);
       S : array (Natural range 0 .. N) of Natural;
 
       function Accepte (I : Natural; P : TP) return Boolean is
@@ -671,6 +666,7 @@ procedure prog_avan is
          return True;
       end Accepte;
       function EvalMinMax (I : Natural; P : TP) return Integer is
+         pragma Unreferenced (P);
          J   : Positive := 1;
          Res : Positive;
       begin
@@ -684,6 +680,7 @@ procedure prog_avan is
          return Res;
       end EvalMinMax;
       function DefiniFils (I : Natural; P : TP) return Positive is
+         pragma Unreferenced (I, P);
       begin
          return 1;
       end DefiniFils;
@@ -692,6 +689,7 @@ procedure prog_avan is
          return P (I) + 1;
       end DefiniFrere;
       function ExisteFils (I : Natural; P : TP) return Boolean is
+         pragma Unreferenced (P);
       begin
          return I < N;
       end ExisteFils;
@@ -737,15 +735,14 @@ procedure prog_avan is
          end loop;
          if Acc and then I = N then
             -- l'équation :
-            if P (1) * 10 + P (2) + P (2) * 10 + P (1) /=
-               P (3) * 100 + P (1) * 10 + P (3)
-            then
+            if P (1) * 10 + P (2) + P (2) * 10 + P (1) /= P (3) * 100 + P (1) * 10 + P (3) then
                Acc := False;
             end if;
          end if;
          return Acc;
       end Accepte;
       function DefiniFils (I : Natural; P : TP) return Natural is
+         pragma Unreferenced (I, P);
       begin
          return 0;
       end DefiniFils;
@@ -754,6 +751,7 @@ procedure prog_avan is
          return P (I) + 1;
       end DefiniFrere;
       function ExisteFils (I : Natural; P : TP) return Boolean is
+         pragma Unreferenced (P);
       begin
          return I < N;
       end ExisteFils;
@@ -777,8 +775,8 @@ procedure prog_avan is
       -- 5 objets caractérisés par leur taille, poids et importance
       -- 1 sac caractérisé par sa taille maximale et son poids maximal
       -- Solutions de valeur 0 à 1 suivant que l'objet reste ou est pris dans le sac
-      N             : constant := 5;
-      K             : constant := 1;
+      N             : constant             := 5;
+      K             : constant             := 1;
       Taille        : constant TP (1 .. N) := (1, 2, 3, 4, 5);
       Poids         : constant TP (1 .. N) := (2, 4, 6, 8, 10);
       Importance    : constant TP (1 .. N) := (5, 4, 3, 2, 1);
@@ -813,6 +811,7 @@ procedure prog_avan is
          return Acc;
       end Accepte;
       function DefiniFils (I : Natural; P : TP) return Natural is
+         pragma Unreferenced (I, P);
       begin
          return 0;
       end DefiniFils;
@@ -821,6 +820,7 @@ procedure prog_avan is
          return P (I) + 1;
       end DefiniFrere;
       function ExisteFils (I : Natural; P : TP) return Boolean is
+         pragma Unreferenced (P);
       begin
          return I < N;
       end ExisteFils;

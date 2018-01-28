@@ -24,8 +24,8 @@
 
 pragma Assertion_Policy (Check);
 
-with Ada.Text_IO;                       use Ada.Text_IO;
-with Ada.Float_Text_IO;                 use Ada.Float_Text_IO;
+with Ada.Text_IO;       use Ada.Text_IO;
+with Ada.Float_Text_IO; use Ada.Float_Text_IO;
 with Ada.Calendar;
 with Ada.Numerics.Elementary_Functions;
 with Ada.Characters.Handling;
@@ -63,8 +63,8 @@ procedure prog_avan2 is
    private
       type Tableau_Element is array (1 .. N) of Element;
       type Pile is tagged record
-         Pile   : Tableau_Element;
          Sommet : Natural := 0;
+         Pile   : Tableau_Element;
       end record;
    end Piles;
 
@@ -377,14 +377,7 @@ procedure prog_avan2 is
    end Suite;
 
    procedure TriInterClassement (S : in out TP) is
-      procedure InterClass
-        (A    : TP;
-         I, J : Positive;
-         B    : TP;
-         K, L : Positive;
-         C    : in out TP;
-         M    : Positive)
-      is
+      procedure InterClass (A : TP; I, J : Positive; B : TP; K, L : Positive; C : in out TP; M : Positive) is
          IP : Positive := I;
          KP : Positive := K;
          MP : Positive := M;
@@ -419,8 +412,8 @@ procedure prog_avan2 is
    begin
       -- construction de N sous-listes de 1 élément
       for T in 1 .. N loop
-         A (1) (2 * T - 1)  := 1;
-         A (1) (2 * T)      := S (T);
+         A (1) (2 * T - 1) := 1;
+         A (1) (2 * T)     := S (T);
       end loop;
       loop
          I        := 1;
@@ -430,22 +423,14 @@ procedure prog_avan2 is
             Longueur := Longueur + A (K) (I);
             if Longueur < N then
                J := I + 1 + A (K) (I);
-               InterClass
-                 (A (K),
-                  I + 1,
-                  I + A (K) (I),
-                  A (K),
-                  J + 1,
-                  J + A (K) (J),
-                  A (3 - K),
-                  M + 1);
-               A (3 - K) (M)  := A (K) (I) + A (K) (J);
-               M              := M + 1 + A (K) (I) + A (K) (J);
-               I              := J + 1 + A (K) (J);
-               Longueur       := Longueur + A (K) (J);
+               InterClass (A (K), I + 1, I + A (K) (I), A (K), J + 1, J + A (K) (J), A (3 - K), M + 1);
+               A (3 - K) (M) := A (K) (I) + A (K) (J);
+               M             := M + 1 + A (K) (I) + A (K) (J);
+               I             := J + 1 + A (K) (J);
+               Longueur      := Longueur + A (K) (J);
             else
                InterClass (A (K), I + 1, I + A (K) (I), A (K), J + 1, J, A (3 - K), M + 1);
-               A (3 - K) (M)  := A (K) (I);
+               A (3 - K) (M) := A (K) (I);
             end if;
             exit when Longueur = N;
          end loop;
@@ -502,11 +487,7 @@ procedure prog_avan2 is
             if X (I) = 0 then
                L := 1;
             else
-               L :=
-                 Natural (Float'Ceiling
-                             (Ada.Numerics.Elementary_Functions.Log
-                                 (Float (abs (X (I))),
-                                  10.0)));
+               L := Natural (Float'Ceiling (Ada.Numerics.Elementary_Functions.Log (Float (abs (X (I))), 10.0)));
             end if;
             if L > N then
                N := L;
@@ -516,7 +497,7 @@ procedure prog_avan2 is
       end NbMaxChiffres;
       function Chiffre (X : Integer; N : Positive) return Natural is
       begin
-         return (abs (X) / 10 ** (N - 1)) mod 10;
+         return (abs (X) / 10**(N - 1)) mod 10;
       end Chiffre;
       N              : constant Natural := NbMaxChiffres (X);
       A              : array (X'Range, 1 .. N) of Natural; -- X nombres de N chiffres
@@ -547,7 +528,7 @@ procedure prog_avan2 is
             if D (K) = 0 then
                D (K) := II; -- élément II placé en début
             else
-               B (E (K))  := II; -- élément II chaîné en fin
+               B (E (K)) := II; -- élément II chaîné en fin
             end if;
             B (II) := 0;  -- élément II déchaîné
             E (K)  := II; -- élément II placé en fin
@@ -559,7 +540,7 @@ procedure prog_avan2 is
                if M = 0 then
                   Tete := D (P);
                else
-                  B (E (M))  := D (P);
+                  B (E (M)) := D (P);
                end if;
                M := P;
             end if;
@@ -708,8 +689,7 @@ procedure prog_avan2 is
       function Premier (N : Positive) return Positive is
          -- La conjecture de Legendre affirme qu'il existe un nombre premier entre n^2 et (n+1)^2
          -- Nous cherchons alors un nombre premier entre N+1 et (sqrt(N)+1)^2
-         Max    : constant Positive           :=
-            (Positive (Ada.Numerics.Elementary_Functions.Sqrt (Float (N))) + 1) ** 2;
+         Max    : constant Positive           := (Positive (Ada.Numerics.Elementary_Functions.Sqrt (Float (N))) + 1)**2;
          Crible : array (2 .. Max) of Boolean := (others => True);
          I      : Positive range 2 .. Max     := 2;
       begin
@@ -764,8 +744,8 @@ procedure prog_avan2 is
             Put_Line ("Collision : " & P'Img & H (Clé, P)'Img);
          end loop;
          if Z (H (Clé, P)) = 0 then
-            Z (H (Clé, P))  := Clé;
-            S (H (Clé, P))  := Element;
+            Z (H (Clé, P)) := Clé;
+            S (H (Clé, P)) := Element;
          else
             raise Plein;
          end if;
@@ -790,8 +770,8 @@ procedure prog_avan2 is
             P := P + 1;
          end loop;
          if Z (H (Clé, P)) = Clé then
-            Z (H (Clé, P))  := 0;
-            Trouvé          := True;
+            Z (H (Clé, P)) := 0;
+            Trouvé         := True;
          else
             Trouvé := False;
          end if;
@@ -892,7 +872,7 @@ procedure prog_avan2 is
       end record;
       subtype Ligne is Positive range 1 .. 80;
       Chaîne : String renames Entrée;
-      K      : Ligne := 1;
+      K : Ligne := 1;
       function Nouveau (NVal : Character; NC1, NC2 : PNoeud) return PNoeud is
       -- Créé un nouveau noeud dans l'arbre
       begin
@@ -949,18 +929,12 @@ procedure prog_avan2 is
          elsif I.Val = '+' or I.Val = '-' then
             return Nouveau (I.Val, Dérive (I.C1), Dérive (I.C2));
          elsif I.Val = '*' then
-            return Nouveau
-                     ('+',
-                      Nouveau ('*', I.C1, Dérive (I.C2)),
-                      Nouveau ('*', Dérive (I.C1), I.C2));
+            return Nouveau ('+', Nouveau ('*', I.C1, Dérive (I.C2)), Nouveau ('*', Dérive (I.C1), I.C2));
          elsif I.Val = '/' then
             return Nouveau
-                     ('/',
-                      Nouveau
-                         ('-',
-                          Nouveau ('*', Dérive (I.C1), I.C2),
-                          Nouveau ('*', Dérive (I.C2), I.C1)),
-                      Nouveau ('*', Copie (I.C2), Copie (I.C2)));
+                ('/',
+                 Nouveau ('-', Nouveau ('*', Dérive (I.C1), I.C2), Nouveau ('*', Dérive (I.C2), I.C1)),
+                 Nouveau ('*', Copie (I.C2), Copie (I.C2)));
          else
             Put_Line ("Erreur '" & I.Val & "' symbole inconnu !");
             return null;
@@ -1116,7 +1090,7 @@ procedure prog_avan2 is
                end if;
                Valeur.Depiler (U);
                Valeur.Depiler (V);
-               Valeur.Empiler (V ** U);
+               Valeur.Empiler (V**U);
             when others =>
                Put_Line ("Erreur dans l'expression : " & E (I)'Img);
          end case;
@@ -1156,7 +1130,7 @@ procedure prog_avan2 is
          R (I) := V (1);
          J     := 1;
          loop
-         -- Chercher le plus petit fils s'il y en a
+            -- Chercher le plus petit fils s'il y en a
             Y_A_Fils := False;
             X        := Sup;
             for M in 2 * J .. 2 * J + 1 loop
@@ -1184,7 +1158,7 @@ procedure prog_avan2 is
       -- Tableau de taille fixe augmentant avec le carré du nombre de noeuds
       -- Exige la définition d'un valeur d'arc représentant l'absence d'arc
       -- Les actions ajoute et supprime sont rapides
-      subtype IndexNoeud is Positive range 1 .. Noeud'Pos (Noeud'Last) ** 2;
+      subtype IndexNoeud is Positive range 1 .. Noeud'Pos (Noeud'Last)**2;
       TableauArcs : array (IndexNoeud) of Arcs := (others => Null_Arc);
       function Index (Origine, Extrémité : Noeud) return IndexNoeud is
       begin
@@ -1192,11 +1166,11 @@ procedure prog_avan2 is
       end Index;
       procedure AjouteArc (Origine, Extrémité : Noeud; Arc : Arcs) is
       begin
-         TableauArcs (Index (Origine, Extrémité))  := Arc;
+         TableauArcs (Index (Origine, Extrémité)) := Arc;
       end AjouteArc;
       procedure SupprimeArc (Origine, Extrémité : Noeud) is
       begin
-         TableauArcs (Index (Origine, Extrémité))  := Null_Arc;
+         TableauArcs (Index (Origine, Extrémité)) := Null_Arc;
       end SupprimeArc;
       procedure AfficheListeNoeudsExtrémité (Origine : Noeud) is
       begin
@@ -1242,8 +1216,9 @@ procedure prog_avan2 is
          ElementCourant : IndexElement := NombreElements;
       begin
          while ElementCourant > 0
-           and then (TableauElements (ElementCourant).Origine /= Origine
-                    or else TableauElements (ElementCourant).Extrémité /= Extrémité)
+           and then
+           (TableauElements (ElementCourant).Origine /= Origine
+            or else TableauElements (ElementCourant).Extrémité /= Extrémité)
          loop
             ElementCourant := ElementCourant - 1;
          end loop;
@@ -1269,8 +1244,7 @@ procedure prog_avan2 is
          if ElementTrouvé = 0 then
             raise NonTrouvé;
          end if;
-         TableauElements (ElementTrouvé .. NombreElements - 1) :=
-           TableauElements (ElementTrouvé + 1 .. NombreElements);
+         TableauElements (ElementTrouvé .. NombreElements - 1) := TableauElements (ElementTrouvé + 1 .. NombreElements);
          NombreElements                                        := NombreElements - 1;
       end SupprimeArc;
       procedure AfficheListeNoeudsExtrémité (Origine : Noeud) is
@@ -1551,9 +1525,7 @@ procedure prog_avan2 is
             then
                NoeudCourant.Frère := null;
             end if;
-            if NoeudCourant.Suivant /= null
-              and then NoeudCourant.Suivant.Origine = Extrémité
-            then
+            if NoeudCourant.Suivant /= null and then NoeudCourant.Suivant.Origine = Extrémité then
                Trouvé               := NoeudCourant.Suivant;
                NoeudCourant.Suivant := NoeudCourant.Suivant.Suivant;
             end if;
@@ -1592,9 +1564,7 @@ procedure prog_avan2 is
          NoeudCourant : PPlexe := Premier;
       begin
          while NoeudCourant /= null loop
-            if NoeudCourant.Extrémité /= null
-              and then NoeudCourant.Extrémité.Origine = Extrémité
-            then
+            if NoeudCourant.Extrémité /= null and then NoeudCourant.Extrémité.Origine = Extrémité then
                Put_Line
                  ("Origine : " &
                   Image (NoeudCourant.Origine) &
@@ -1614,30 +1584,23 @@ procedure prog_avan2 is
          Arc                : Arcs;
       end record;
       -- Stockage par adressage dispersé avec clé d'entrée donnée par l'origine et l'extrémité
-      package Hash is new HashCoding (Noeud'Pos (Noeud'Last) ** 2, TCouple, Optimum);
+      package Hash is new HashCoding (Noeud'Pos (Noeud'Last)**2, TCouple, Optimum);
       procedure AjouteArc (Origine, Extrémité : Noeud; Arc : Arcs) is
       begin
-         Hash.Stocke
-           (Noeud'Pos (Origine) * Noeud'Pos (Noeud'Last) + Noeud'Pos (Extrémité),
-            (Origine, Extrémité, Arc));
+         Hash.Stocke (Noeud'Pos (Origine) * Noeud'Pos (Noeud'Last) + Noeud'Pos (Extrémité), (Origine, Extrémité, Arc));
       end AjouteArc;
       procedure SupprimeArc (Origine, Extrémité : Noeud) is
          Trouvé : Boolean;
          pragma Unreferenced (Trouvé);
       begin
-         Hash.Supprime
-           (Noeud'Pos (Origine) * Noeud'Pos (Noeud'Last) + Noeud'Pos (Extrémité),
-            Trouvé);
+         Hash.Supprime (Noeud'Pos (Origine) * Noeud'Pos (Noeud'Last) + Noeud'Pos (Extrémité), Trouvé);
       end SupprimeArc;
       procedure AfficheListeNoeudsExtrémité (Origine : Noeud) is
          Couple : TCouple;
          Trouvé : Boolean;
       begin
          for Extrémité in Noeud loop
-            Hash.Accede
-              (Noeud'Pos (Origine) * Noeud'Pos (Noeud'Last) + Noeud'Pos (Extrémité),
-               Couple,
-               Trouvé);
+            Hash.Accede (Noeud'Pos (Origine) * Noeud'Pos (Noeud'Last) + Noeud'Pos (Extrémité), Couple, Trouvé);
             if Trouvé then
                Put_Line
                  ("Origine : " &
@@ -1654,10 +1617,7 @@ procedure prog_avan2 is
          Trouvé : Boolean;
       begin
          for Origine in Noeud loop
-            Hash.Accede
-              (Noeud'Pos (Origine) * Noeud'Pos (Noeud'Last) + Noeud'Pos (Extrémité),
-               Couple,
-               Trouvé);
+            Hash.Accede (Noeud'Pos (Origine) * Noeud'Pos (Noeud'Last) + Noeud'Pos (Extrémité), Couple, Trouvé);
             if Trouvé then
                Put_Line
                  ("Origine : " &
@@ -1679,15 +1639,7 @@ procedure prog_avan2 is
    Z       : TP := (1 => 25);
    U       : TP := (79, 123, 468, 19, 256, 64, 27, 12, 842, 20, 122, 88, 54, 67, 0, 74);
 
-   T : constant array (1 .. 8, 1 .. 2) of Positive :=
-     ((2, 4),
-      (2, 7),
-      (3, 2),
-      (4, 5),
-      (6, 7),
-      (7, 1),
-      (7, 4),
-      (7, 5));
+   T : constant array (1 .. 8, 1 .. 2) of Positive := ((2, 4), (2, 7), (3, 2), (4, 5), (6, 7), (7, 1), (7, 4), (7, 5));
    -- Stockage par adressage dispersé avec clé d'entrée donnée par une combinaison du couple T(i)
    package HashL is new HashCoding (T'Length (1), Positive, Linéaire);
    package HashO is new HashCoding (T'Length (1), Positive, Optimum);

@@ -38,10 +38,7 @@ procedure CalculDeListes is
       function Queue (L : Liste) return TElement;
       function Position (L : Liste; P : Positive) return TElement;
       function Renverse (L : Liste) return Liste;
-      function Applique
-        (L    : Liste;
-         F    : access function (E : TElement) return TElement)
-         return Liste;
+      function Applique (L : Liste; F : access function (E : TElement) return TElement) return Liste;
       procedure Scinde (L : Liste; Tête : out TElement; Reste : out Liste);
    private
       package IntListes is new Ada.Containers.Doubly_Linked_Lists (TElement);
@@ -113,11 +110,7 @@ procedure CalculDeListes is
          end return;
       end Renverse;
 
-      function Applique
-        (L    : Liste;
-         F    : access function (E : TElement) return TElement)
-         return Liste
-      is
+      function Applique (L : Liste; F : access function (E : TElement) return TElement) return Liste is
          Curseur : IntListes.Cursor := First (L);
          use type IntListes.Cursor;
       begin
@@ -134,7 +127,7 @@ procedure CalculDeListes is
          use type IntListes.Cursor;
       begin
          if Curseur /= IntListes.No_Element then
-            Tête  := IntListes.Element (Curseur);
+            Tête := IntListes.Element (Curseur);
             IntListes.Next (Curseur);
             while Curseur /= IntListes.No_Element loop
                Append (Reste, IntListes.Element (Curseur));
@@ -174,10 +167,5 @@ procedure CalculDeListes is
 
 begin
    Put (Mini (Créé_Liste ((2.0, 4.0, 3.3)) & 1.0));
-   Put
-     (Position
-         (Applique
-             (5.0 & Créé_Liste ((2.0, 4.0, 3.3)) & Créé_Liste ((1 => 8.2)),
-              Fois_2'Access),
-          5));
+   Put (Position (Applique (5.0 & Créé_Liste ((2.0, 4.0, 3.3)) & Créé_Liste ((1 => 8.2)), Fois_2'Access), 5));
 end CalculDeListes;
